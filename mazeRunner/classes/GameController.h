@@ -1,5 +1,5 @@
-#ifndef CHRONO_H
-#define CHRONO_H
+#ifndef GameController_H
+#define GameController_H
 
 #include "raylib.h"
 #include <vector>
@@ -11,7 +11,7 @@
 #include <sstream>   // For string stream
 #include <string>
 
-class Chrono {
+class GameController {
 private:
     // Timer properties
     float tempsInitial;
@@ -63,7 +63,7 @@ public:
     bool condition = true;
     Music intro2 = LoadMusicStream("intro2.mp3");
 
-    Chrono()
+    GameController()
         : tempsInitial(60.0f), tempsRestant(60.0f), enCours(false), jeuCommence(false), introShown(false) {
         introImage = LoadTexture("maze_runner.png");        // Load intro image
         leaderboard_background = LoadTexture("leaderboard_background.png");        // Load leaderboard_background image
@@ -97,7 +97,7 @@ leaderboardButtonRect = {
         };
     }
 
-    ~Chrono() {
+    ~GameController() {
         UnloadTexture(introImage);
         UnloadTexture(startButtonImage);
         UnloadTexture(leaderboardButtonImage);
@@ -567,4 +567,4 @@ DrawTextEx(font, "3 - Hard (150s)", Vector2{centerX, (float)HEIGHT / 2 + 50}, te
         }
 };
 
-#endif // CHRONO_H
+#endif // GameController_H

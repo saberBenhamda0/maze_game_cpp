@@ -3,7 +3,7 @@
 #include "classes/cell.h"
 #include "classes/maze.h"
 #include "classes/joueur.h"
-#include "classes/chrono.h"
+#include "classes/GameController.h"
 
 using namespace std;
 
@@ -41,9 +41,9 @@ int main() {
     SetTargetFPS(60);
     InitAudioDevice();
     Music intro = LoadMusicStream("intro.mp3");
-    Chrono chrono;
+    GameController GameController;
 
-    int difficulte = chrono.afficherMenuDifficulte();  // Select game difficulty level
+    int difficulte = GameController.afficherMenuDifficulte();  // Select game difficulty level
 
    restartTexture = LoadTexture("restart_button.png");  // Image for Restart button
     toggleTexture = LoadTexture("toggle_solution.png"); 
@@ -59,22 +59,22 @@ int main() {
     Maze maze(difficulte);        // Initialize the maze
     maze.generateMaze();
 
-    int playerChoice = chrono.playerChoice;        // Generate maze based on difficulty
+    int playerChoice = GameController.playerChoice;        // Generate maze based on difficulty
 
     Cell* startCell = &maze.grid[0];       // Start at the first cell
     Cell* exitCell = maze.endCell;   // Define the exit cell for the maze
-    Joueur joueur1(startCell, difficulte, chrono.player1Name);  // Initialize player at start cell
+    Joueur joueur1(startCell, difficulte, GameController.player1Name);  // Initialize player at start cell
 
     Joueur* joueur2 = nullptr;  // Declare joueur2 as nullptr initially, in case it's a single player game
     if (playerChoice == 2) {
-        joueur2 = new Joueur(&maze.grid[(maze.rows - 1) * maze.cols], difficulte, chrono.player2Name);  // Start at the last row
+        joueur2 = new Joueur(&maze.grid[(maze.rows - 1) * maze.cols], difficulte, GameController.player2Name);  // Start at the last row
     }
 
     // Solve the maze
     maze.solveMaze();
 
     while (!WindowShouldClose()) {
-        chrono.miseAJour(jeuTermine);  // Update chrono
+        GameController.miseAJour(jeuTermine);  // Update GameController
         UpdateMusicStream(intro);
     PlayMusicStream(intro);
 
@@ -82,11 +82,11 @@ int main() {
         if (jeuTermine ) {
             if (!scoreSaved) {
                 if (joueur1.aAtteintSortie(exitCell)) {
-                    chrono.saveScore(chrono.player1Name, chrono.calculate_score(difficulte));
+                    GameController.saveScore(GameController.player1Name, GameController.calculate_score(difficulte));
                     scoreSaved = true;  // Set flag to true to prevent further saves
                 }
                 else if (joueur2 && joueur2->aAtteintSortie(exitCell)) {
-                    chrono.saveScore(chrono.player2Name, chrono.calculate_score(difficulte));
+                    GameController.saveScore(GameController.player2Name, GameController.calculate_score(difficulte));
                     scoreSaved = true;  // Set flag to true to prevent further saves
                 }
             }
@@ -104,7 +104,7 @@ int main() {
             StopMusicStream(intro);
 
            /* while(!leaderboardDisplayed) {
-                chrono.displayLeaderboard();
+                GameController.displayLeaderboard();
                 if (IsKeyPressed(KEY_ENTER)){
                     leaderboardDisplayed = true; // Set to true after displaying the leaderboard
                 }
@@ -117,19 +117,19 @@ int main() {
             // Check for 'R' key to restart
             if (IsKeyPressed(KEY_R)){ /*-----------game complete------------ */
         // Reset the game
-        chrono.reset();
+        GameController.reset();
         PlayMusicStream(intro);
-        chrono.condition = true;
-        difficulte = chrono.afficherMenuDifficulte();
+        GameController.condition = true;
+        difficulte = GameController.afficherMenuDifficulte();
         maze = Maze(difficulte);
         maze.generateMaze();
         startCell = &maze.grid[0];
         exitCell = maze.endCell;
-        joueur1 = Joueur(startCell, difficulte, chrono.player1Name);
+        joueur1 = Joueur(startCell, difficulte, GameController.player1Name);
 
         if (playerChoice == 2) {
             delete joueur2;  // Clean up previous joueur2 if it exists
-            joueur2 = new Joueur(&maze.grid[(maze.rows - 1) * maze.cols], difficulte, chrono.player2Name);
+            joueur2 = new Joueur(&maze.grid[(maze.rows - 1) * maze.cols], difficulte, GameController.player2Name);
         } else {
             joueur2 = nullptr;  // Set to nullptr if no second player
         }
@@ -146,11 +146,11 @@ int main() {
     if (!scoreSaved) {
         // Save scores when a player completes the game
         if (joueur1.aAtteintSortie(exitCell)) {
-            chrono.saveScore(chrono.player1Name, chrono.calculate_score(difficulte));
+            GameController.saveScore(GameController.player1Name, GameController.calculate_score(difficulte));
             scoreSaved = true;
         }
         else if (joueur2 && joueur2->aAtteintSortie(exitCell)) {
-            chrono.saveScore(chrono.player2Name, chrono.calculate_score(difficulte));
+            GameController.saveScore(GameController.player2Name, GameController.calculate_score(difficulte));
             scoreSaved = true;
         }
     }
@@ -179,12 +179,12 @@ if (!leaderboardDisplayed) {
 
         if (joueur1.aAtteintSortie(exitCell)) {
             char message[150];  // Buffer to hold the full message
-            snprintf(message, sizeof(message), "Congratulations! %s", chrono.player1Name);  // Safely format message
+            snprintf(message, sizeof(message), "Congratulations! %s", GameController.player1Name);  // Safely format message
             DrawText(message, WIDTH / 2 - MeasureText(message, 50) / 2, HEIGHT / 2 - 50, 50, GREEN);
         } 
         else if (joueur2 && joueur2->aAtteintSortie(exitCell)) {
             char message[150];  // Buffer for the full message
-            snprintf(message, sizeof(message), "Congratulations! %s", chrono.player2Name);  // Safely format message
+            snprintf(message, sizeof(message), "Congratulations! %s", GameController.player2Name);  // Safely format message
             DrawText(message, WIDTH / 2 - MeasureText(message, 50) / 2, HEIGHT / 2 - 50, 50, GREEN);
         }
 
@@ -194,7 +194,7 @@ if (!leaderboardDisplayed) {
     }
 } while(leaderboardDisplayed && restart_frame) {
     // Display the leaderboard
-    chrono.displayLeaderboard();
+    GameController.displayLeaderboard();
     if(IsKeyPressed(KEY_ENTER)){
         restart_frame = false;
     }
@@ -226,19 +226,19 @@ if(!restart_frame){
     // Check for 'R' key to restart the game
     if (IsKeyPressed(KEY_R)) { /*-----------game complete------------ */
         // Reset the game
-        chrono.reset();
+        GameController.reset();
         PlayMusicStream(intro);
-        chrono.condition = true;
-        difficulte = chrono.afficherMenuDifficulte();
+        GameController.condition = true;
+        difficulte = GameController.afficherMenuDifficulte();
         maze = Maze(difficulte);
         maze.generateMaze();
         startCell = &maze.grid[0];
         exitCell = maze.endCell;
-        joueur1 = Joueur(startCell, difficulte, chrono.player1Name);
+        joueur1 = Joueur(startCell, difficulte, GameController.player1Name);
 
         if (playerChoice == 2) {
             delete joueur2;  // Clean up previous joueur2 if it exists
-            joueur2 = new Joueur(&maze.grid[(maze.rows - 1) * maze.cols], difficulte, chrono.player2Name);
+            joueur2 = new Joueur(&maze.grid[(maze.rows - 1) * maze.cols], difficulte, GameController.player2Name);
         } else {
             joueur2 = nullptr;  // Set to nullptr if no second player
         }
@@ -279,7 +279,7 @@ if(!restart_frame){
         ClearBackground(BLACK);
 
         // Draw maze, player, and countdown timer
-        chrono.afficherCompteARebours(10, 10, 20, BLACK);  // Show the countdown timer
+        GameController.afficherCompteARebours(10, 10, 20, BLACK);  // Show the countdown timer
 
         maze.draw();
         joueur1.dessiner();
@@ -287,16 +287,16 @@ if(!restart_frame){
             joueur2->dessiner();
         }
          if(difficulte == 1 ||difficulte == 2 || difficulte == 3 ){
-       chrono.afficherCompteARebours(10, 10, 20, BLACK);
+       GameController.afficherCompteARebours(10, 10, 20, BLACK);
 
         }
         
    /* --------------------------------------------(---------------------------------------------------------------------------------------------------- hna fen button conditio dyala*/     
     if (IsButtonPressed(restartButton)) {
 
-    // Reset chrono timer
-   chrono.afficherCompteARebours(10, 10, 20, BLACK);  // Show the countdown timer
-    chrono.reset();
+    // Reset GameController timer
+   GameController.afficherCompteARebours(10, 10, 20, BLACK);  // Show the countdown timer
+    GameController.reset();
 
     // Reset other game components
     maze = Maze(difficulte);  // Reinitialize maze with current difficulty
@@ -305,12 +305,12 @@ if(!restart_frame){
     exitCell = maze.endCell;
 
     // Reinitialize the player(s)
-    joueur1 = Joueur(startCell, difficulte, chrono.player1Name);
-    chrono.demarrer(difficulte);  // Start the chrono
+    joueur1 = Joueur(startCell, difficulte, GameController.player1Name);
+    GameController.demarrer(difficulte);  // Start the GameController
 
-    // Update chrono to reflect the reset state
-    chrono.condition = true;
-    chrono.miseAJour(jeuTermine);
+    // Update GameController to reflect the reset state
+    GameController.condition = true;
+    GameController.miseAJour(jeuTermine);
 
     maze.draw();  // Redraw the maze
 
@@ -319,7 +319,7 @@ if(!restart_frame){
     // Reset player 2 if applicable
     if (playerChoice == 2) {
         delete joueur2;  // Clean up previous player 2 if it exists
-        joueur2 = new Joueur(&maze.grid[(maze.rows - 1) * maze.cols], difficulte, chrono.player2Name);
+        joueur2 = new Joueur(&maze.grid[(maze.rows - 1) * maze.cols], difficulte, GameController.player2Name);
     } else {
         joueur2 = nullptr;  // Set player 2 to nullptr if not needed
     }
